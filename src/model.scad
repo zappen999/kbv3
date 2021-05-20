@@ -1,29 +1,30 @@
-// TODO: These should be per finger later on
-PROXIMAL_PHALANX_LENGTH=55;
-MIDDLE_PHALANX_LENGTH=25;
-DISTAL_PHALANX_LENGTH=23;
+include <settings.scad>;
 
 SWITCH_PLATE_THICKNESS=3;
 SWITCH_MIN_SPACE_CC=18.5;
 
-
 function deg2rad(deg) = deg*PI/180;
 function inch2mm(inches) = inches*25.4;
 
-function finger_joint_yz(prev_joint_p, phalanx_len, angle) = [
-	prev_joint_p[0] + (phalanx_len * cos(angle)),
-	prev_joint_p[1] + (phalanx_len * sin(angle))
+// Returns a new point in the yz plane based on distance and angle
+function yz_point_at_distance(prev_joint_p, distance, angle) = [
+	prev_joint_p[0] + (distance * cos(angle)),
+	prev_joint_p[1] + (distance * sin(angle))
 ];
 
 module finger_plane(p, angle) {
-	translate([0, p[0], -p[1]])
-		rotate([-angle+90, 0, 0])
+	translate([0, p[0], p[1]])
+		rotate([angle+90, 0, 0])
 			children();
 }
 
 module finger_joint() {
-	rotate([0, 90, 0])
-		sphere(d=3, $fn=20);
+	cube(3, center=true);
+}
+
+module keycap() {
+	translate([0, 0, -KEYCAP_BOX.z/2])
+		cube(KEYCAP_BOX, center=true);
 }
 
 module mx_switch_plate() {
@@ -41,40 +42,22 @@ module mx_switch_plate() {
 	}
 }
 
-module finger_sweep(
-	proximal_phalanx_len,
-	middle_phalanx_len,
-	distal_phalanx_len
-) {
-	// Knuckle
-	p1 = [0, 0];
-
-	finger_plane(p1, 0)
-		finger_joint();
-
-	for (angle = [0:19:140]) {
-		// Proximal bone end
-		p2 = finger_joint_yz(p1, proximal_phalanx_len, angle/3);
-
-		// Middle bone end
-		p3 = finger_joint_yz(p2, middle_phalanx_len, angle/1.5);
-
-		// Distal bone end (tip)
-		p4 = finger_joint_yz(p3, distal_phalanx_len, angle);
-
-		finger_plane(p2, angle)
-			finger_joint();
-
-		finger_plane(p3, angle)
-			finger_joint();
+for (finger = FINGERS) {
+	for (key = finger) {
+		p1 = key[0];
+		p2 = key[1];
+		p3 = key[2];
+		p4 = key[3];
+		angle = key[4];
+		
+		echo(p1=p1, p2=p2, p3=p3, p4=p4, angle=angle);
 
 		finger_plane(p4, angle)
-			finger_joint();
+			keycap();
 
-		finger_plane(p4, angle)
-			mx_switch_plate();
+		finger_plane(p1, angle) finger_joint();
+		finger_plane(p2, angle/3) finger_joint();
+		finger_plane(p3, angle/1.5) finger_joint();
+		finger_plane(p4, angle) finger_joint();
 	}
 }
-
-// Index finger
-finger_sweep(PROXIMAL_PHALANX_LENGTH, MIDDLE_PHALANX_LENGTH, DISTAL_PHALANX_LENGTH);
