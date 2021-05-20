@@ -42,6 +42,15 @@ module mx_switch_plate() {
 	}
 }
 
+module finger_bone(p1, p2) {
+	hull() {
+		translate([0, p1[0], p1[1]])
+			cube(1, center=true);
+		translate([0, p2[0], p2[1]])
+			cube(1, center=true);
+	}
+}
+
 for (finger = FINGERS) {
 	for (key = finger) {
 		p1 = key[0];
@@ -54,6 +63,10 @@ for (finger = FINGERS) {
 
 		finger_plane(p4, angle)
 			keycap();
+
+		finger_bone(p1, p2);
+		finger_bone(p2, p3);
+		finger_bone(p3, p4);
 
 		finger_plane(p1, angle) finger_joint();
 		finger_plane(p2, angle/3) finger_joint();
