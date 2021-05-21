@@ -29,7 +29,7 @@ def get_key_back_egde(p, angle):
     # above back top of the key
     p1 = point_at_distance(p0, -KEY_INTERSECTION_CLEARANCE, angle)
     # back bottom of the key
-    p2 = point_at_distance(p1, (KEY_INTERSECTION_CLEARANCE*3)+KEYCAP_BOX['z'], angle)
+    p2 = point_at_distance(p1, (KEY_INTERSECTION_CLEARANCE*10)+KEYCAP_BOX['z'], angle)
 
     return LineSegment(p1, p2)
 

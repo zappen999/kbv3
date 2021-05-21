@@ -24,7 +24,7 @@ module finger_plane(p, angle) {
 }
 
 module finger_joint() {
-	cube(3, center=true);
+	cube(1.5, center=true);
 }
 
 module keycap(real=false) {
@@ -52,7 +52,7 @@ module mx_switch_plate() {
 	}
 }
 
-module line(p1, p2, thickness=1, hex="#fafafa") {
+module line(p1, p2, thickness=0.5, hex="#fafafa") {
 	color(hex)
 		hull() {
 			translate([0, p1[0], p1[1]])
