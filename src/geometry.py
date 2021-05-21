@@ -22,6 +22,9 @@ class LineSegment:
         self.p1 = p1
         self.p2 = p2
 
+    def to_openscad(self):
+        return "[%s, %s]" % (self.p1.to_openscad(), self.p2.to_openscad())
+
     def __repr__(self):
         return "LineSegment {p1: %s, p2: %s}" % (repr(self.p1), repr(self.p2))
 
@@ -37,21 +40,16 @@ def segments_distance(segment1, segment2):
     distances.append(point_segment_distance(segment2.p2, segment1))
     return min(distances)
 
-
-def segments_intersect(segment1, segment2):
-    dx1 = segment1.p2.x - segment1.p1.x
-    dy1 = segment1.p2.y - segment1.p2.y
-    dx2 = segment2.p2.x - segment2.p1.x
-    dy2 = segment2.p2.y - segment2.p1.y
-    delta = dx2 * dy1 - dy2 * dx1
-    if delta == 0:  # parallel segments
-        # TODO: Could be (partially) identical!
-        return False
-    s = (dx1 * (segment2.p1.y - segment1.p1.y) +
-         dy1 * (segment1.p1.x - segment2.p1.x)) / delta
-    t = (dx2 * (segment1.p1.y - segment2.p1.y) +
-         dy2 * (segment2.p1.x - segment1.p1.x)) / (-delta)
-    return (0 <= s <= 1) and (0 <= t <= 1)
+def segments_intersect(s0,s1):
+    dx0 = s0.p2.x-s0.p1.x
+    dx1 = s1.p2.x-s1.p1.x
+    dy0 = s0.p2.y-s0.p1.y
+    dy1 = s1.p2.y-s1.p1.y
+    p0 = dy1*(s1.p2.x-s0.p1.x) - dx1*(s1.p2.y-s0.p1.y)
+    p1 = dy1*(s1.p2.x-s0.p2.x) - dx1*(s1.p2.y-s0.p2.y)
+    p2 = dy0*(s0.p2.x-s1.p1.x) - dx0*(s0.p2.y-s1.p1.y)
+    p3 = dy0*(s0.p2.x-s1.p2.x) - dx0*(s0.p2.y-s1.p2.y)
+    return (p0*p1<=0) & (p2*p3<=0)
 
 
 def point_segment_distance(point, segment):
@@ -104,3 +102,8 @@ def point_at_distance(p, distance, angle):
         p.x + (distance * math.cos(angle_rad)),
         p.y + (distance * math.sin(angle_rad))
     )
+
+
+def distance_between_points(p1, p2):
+    return math.sqrt((math.pow(p2.x-p1.x, 2))+(math.pow(p2.y-p1.y, 2)))
+

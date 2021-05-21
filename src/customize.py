@@ -6,30 +6,39 @@ from geometry import Point, \
     LineSegment, \
     segments_distance, \
     deg2rad, \
-    point_at_distance \
+    point_at_distance, \
+    segments_intersect, \
+    distance_between_points
 
 from settings import FINGERS, \
         KEYCAP_BOX, \
-        COLUMN_KEY_DISTANCE
+        KEY_INTERSECTION_CLEARANCE
 
 
 def get_key_back_egde(p, angle):
-    p1 = point_at_distance(p, -(KEYCAP_BOX['y']/2), angle)  # back top of the key
-    p2 = point_at_distance(p1, -KEYCAP_BOX['z'], angle-90)  # back bottom of the key
+    # back top of the key
+    p0 = point_at_distance(p, KEYCAP_BOX['y']/2, angle-90)
+    # above back top of the key
+    p1 = point_at_distance(p0, -KEY_INTERSECTION_CLEARANCE, angle)
+    # back bottom of the key
+    p2 = point_at_distance(p1, (KEY_INTERSECTION_CLEARANCE*3)+KEYCAP_BOX['z'], angle)
 
     return LineSegment(p1, p2)
 
 
 def get_key_front_egde(p, angle):
-    p1 = point_at_distance(p, KEYCAP_BOX['y']/2, angle)  # top of the key
-    p2 = point_at_distance(p1, KEYCAP_BOX['z'], -angle-90)  # bottom of the key
+    # front top of the key
+    p0 = point_at_distance(p, KEYCAP_BOX['y']/2, angle+90)
+    # above front top of the key
+    p1 = point_at_distance(p0, -KEY_INTERSECTION_CLEARANCE, angle)
+    # below front bottom of the key
+    p2 = point_at_distance(p1, (KEY_INTERSECTION_CLEARANCE*3)+KEYCAP_BOX['z'], angle)
 
     return LineSegment(p1, p2)
 
 
 def generate_key_positions(finger):
-    angles = range(-finger['max_angle'], -finger['min_angle'], 15)
-    # angles = [i / 10.0 for i in range(-finger['max_angle'] * 10, -finger['min_angle'] * 10)]
+    angles = [x/10 for x in range(finger['max_angle']*10, finger['min_angle']*10, 1)]
     p1 = Point(0, 0)  # knuckle (y, z)
 
     keys = []
@@ -61,29 +70,27 @@ def generate_key_positions(finger):
             prev_key_egde = get_key_front_egde(prev_key['p4'], prev_key['angle'])
             this_key_egde = get_key_back_egde(p4, angle)
 
-            key_egdes_distance = segments_distance(prev_key_egde, this_key_egde)
-
             pprint({
                 'angle': angle,
                 'prev_p4': prev_key['p4'],
                 'p4': p4,
                 'prev_key_egde': prev_key_egde,
-                'this_key_egde': this_key_egde,
-                'key_egdes_distance': key_egdes_distance,
+                'this_key_egde': this_key_egde
             })
 
-            if key_egdes_distance >= COLUMN_KEY_DISTANCE:
+            clearance_segments_intersect = segments_intersect(this_key_egde, prev_key_egde)
+            # Not the prettiest solution...
+            is_far_apart_enough = distance_between_points(prev_key['p4'], p4) > KEYCAP_BOX['y']
+
+            if is_far_apart_enough and not clearance_segments_intersect:
                 keys.append({
                     'p1': p1,
                     'p2': p2,
                     'p3': p3,
                     'p4': p4,
-                    'angle': angle
-                })
-                print({
+                    'angle': angle,
                     'prev_key_egde': prev_key_egde,
                     'this_key_egde': this_key_egde,
-                    'distance': key_egdes_distance,
                 })
 
     return keys
@@ -109,12 +116,15 @@ def generate_openscad_settings():
         lines.append("\t[")
         for finger_key in finger_keys:
             lines.append("\t\t[")
-            lines.append("\t\t\t%s, %s, %s, %s, %f" % (
+            lines.append("\t\t\t%s, %s, %s, %s, %f, %s, %s" % (
                 finger_key['p1'].to_openscad(),
                 finger_key['p2'].to_openscad(),
                 finger_key['p3'].to_openscad(),
                 finger_key['p4'].to_openscad(),
-                finger_key['angle']))
+                finger_key['angle'],
+                finger_key['prev_key_egde'].to_openscad() if 'prev_key_egde' in finger_key else 'false',
+                finger_key['this_key_egde'].to_openscad() if 'this_key_egde' in finger_key else 'false'
+            ))
             lines.append("\t\t],")
 
         lines.append("\t],")
@@ -122,11 +132,9 @@ def generate_openscad_settings():
     lines.append('];')
     lines.append('KEYCAP_BOX = [%f, %f, %f];' % (
         KEYCAP_BOX['x'], KEYCAP_BOX['y'], KEYCAP_BOX['z']))
-    lines.append('COLUMN_KEY_DISTANCE  = %f;' % COLUMN_KEY_DISTANCE)
 
     return '\n'.join(lines) + '\n'
 
 
 settings = generate_openscad_settings()
-print(settings)
 export_openscad_settings(settings)

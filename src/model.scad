@@ -42,13 +42,14 @@ module mx_switch_plate() {
 	}
 }
 
-module finger_bone(p1, p2) {
-	hull() {
-		translate([0, p1[0], p1[1]])
-			cube(1, center=true);
-		translate([0, p2[0], p2[1]])
-			cube(1, center=true);
-	}
+module line(p1, p2, thickness=1, hex="#fafafa") {
+	color(hex)
+		hull() {
+			translate([0, p1[0], p1[1]])
+				cube(thickness, center=true);
+			translate([0, p2[0], p2[1]])
+				cube(thickness, center=true);
+		}
 }
 
 for (finger = FINGERS) {
@@ -58,15 +59,23 @@ for (finger = FINGERS) {
 		p3 = key[2];
 		p4 = key[3];
 		angle = key[4];
+		prev_key_egde = key[5];
+		this_key_egde = key[6];
 		
-		echo(p1=p1, p2=p2, p3=p3, p4=p4, angle=angle);
+		echo(p1=p1, p2=p2, p3=p3, p4=p4, angle=angle, prev_key_egde, this_key_egde);
 
 		finger_plane(p4, angle)
-			keycap();
+			#keycap();
 
-		finger_bone(p1, p2);
-		finger_bone(p2, p3);
-		finger_bone(p3, p4);
+		line(p1, p2);
+		line(p2, p3);
+		line(p3, p4);
+
+		if (prev_key_egde)
+			line(prev_key_egde[0], prev_key_egde[1], 0.5, "red");
+
+		if (this_key_egde)
+			line(this_key_egde[0], this_key_egde[1], 0.5, "green");
 
 		finger_plane(p1, angle) finger_joint();
 		finger_plane(p2, angle/3) finger_joint();
