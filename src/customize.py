@@ -12,7 +12,8 @@ from geometry import Point, \
 
 from settings import FINGERS, \
         KEYCAP_BOX, \
-        KEY_INTERSECTION_CLEARANCE
+        KEY_INTERSECTION_CLEARANCE, \
+        SHOW_DEBUG_GEOMETRY
 
 
 def get_key_back_egde(p, angle):
@@ -102,7 +103,6 @@ def export_openscad_settings(settings):
     with open(f, 'w') as f:
         f.write(settings)
 
-
 def generate_openscad_settings():
     lines = []
 
@@ -132,6 +132,8 @@ def generate_openscad_settings():
     lines.append('];')
     lines.append('KEYCAP_BOX = [%f, %f, %f];' % (
         KEYCAP_BOX['x'], KEYCAP_BOX['y'], KEYCAP_BOX['z']))
+    lines.append('SHOW_DEBUG_GEOMETRY = %s;' % (
+        'true' if SHOW_DEBUG_GEOMETRY else 'false'))
 
     return '\n'.join(lines) + '\n'
 

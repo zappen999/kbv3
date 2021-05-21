@@ -29,8 +29,10 @@ FINGERS = {
     # },
 }
 
-KEYCAP_BOX = {'x': 18, 'y': 18, 'z': 10}
+KEYCAP_BOX = {'x': 18, 'y': 18, 'z': 7}
 
 # The script will cram in as many keys as possible without keycap collisions.
 # This defines the minimum clearance at the front top of the keycap.
-KEY_INTERSECTION_CLEARANCE = 8
+KEY_INTERSECTION_CLEARANCE = 3
+
+SHOW_DEBUG_GEOMETRY = True
