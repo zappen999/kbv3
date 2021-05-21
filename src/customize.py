@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import math
 import os
+import sys
 from pprint import pprint
-from geometry import Point, \
-    LineSegment, \
+from geometry import LineSegment, \
+    Point, \
+    DDDPoint, \
     segments_distance, \
     deg2rad, \
     point_at_distance, \
@@ -13,7 +15,12 @@ from geometry import Point, \
 from settings import FINGERS, \
         KEYCAP_BOX, \
         KEY_INTERSECTION_CLEARANCE, \
-        SHOW_DEBUG_GEOMETRY
+        SHOW_DEBUG_GEOMETRY, \
+        KNUCKLE_WIDTH, \
+        FINGER_SPREAD
+
+
+KNUCKLE_DISTANCE = KNUCKLE_WIDTH / (len(FINGERS.items()) - 1)
 
 
 def get_key_back_egde(p, angle):
@@ -38,7 +45,7 @@ def get_key_front_egde(p, angle):
     return LineSegment(p1, p2)
 
 
-def generate_key_positions(finger):
+def generate_column_positions(finger):
     angles = [x/10 for x in range(finger['max_angle']*10, finger['min_angle']*10, 1)]
     p1 = Point(0, 0)  # knuckle (y, z)
 
@@ -97,6 +104,13 @@ def generate_key_positions(finger):
     return keys
 
 
+def get_finger_position(index):
+    """ Returns the position and rotation of the knuckle for a finger.
+    """
+    # TODO: Calculate the rotation of finger
+    return DDDPoint(KNUCKLE_DISTANCE * index, 0, 0), 0
+
+
 def export_openscad_settings(settings):
     f = os.path.join(os.path.dirname(__file__), 'settings.scad')
 
@@ -110,13 +124,20 @@ def generate_openscad_settings():
     lines.append('// Edit settings.py and run customize.py to change these values')
     lines.append('FINGERS = [')
 
-    for name, params in FINGERS.items():
-        finger_keys = generate_key_positions(params)
+    finger_index = 0
+
+    for name, params in reversed(FINGERS.items()):
+        finger_keys = generate_column_positions(params)
+        knuckle_position, knuckle_angle = get_finger_position(finger_index)
 
         lines.append("\t[")
+        lines.append("\t\t[%s, %f]," % (
+            knuckle_position.to_openscad(), knuckle_angle))
+        lines.append("\t\t[")
+
         for finger_key in finger_keys:
-            lines.append("\t\t[")
-            lines.append("\t\t\t%s, %s, %s, %s, %f, %s, %s" % (
+            lines.append("\t\t\t[")
+            lines.append("\t\t\t\t%s, %s, %s, %s, %f, %s, %s" % (
                 finger_key['p1'].to_openscad(),
                 finger_key['p2'].to_openscad(),
                 finger_key['p3'].to_openscad(),
@@ -125,7 +146,10 @@ def generate_openscad_settings():
                 finger_key['prev_key_egde'].to_openscad() if 'prev_key_egde' in finger_key else 'false',
                 finger_key['this_key_egde'].to_openscad() if 'this_key_egde' in finger_key else 'false'
             ))
-            lines.append("\t\t],")
+            lines.append("\t\t\t],")
+
+        lines.append("\t\t],")
+        finger_index += 1
 
         lines.append("\t],")
 

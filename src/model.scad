@@ -27,7 +27,7 @@ module finger_joint() {
 	cube(3, center=true);
 }
 
-module keycap(real=true) {
+module keycap(real=false) {
 	translate([0, 0, (if (real) -KEYCAP_BOX.z else -KEYCAP_BOX.z/2)])
 		if (real) {
 			dsa_row(3)
@@ -62,34 +62,45 @@ module line(p1, p2, thickness=1, hex="#fafafa") {
 		}
 }
 
+module knuckle_plane(meta) {
+	translate(meta[0])
+		rotate(meta[1])
+			children();
+}
+
 for (finger = FINGERS) {
-	for (key = finger) {
-		p1 = key[0];
-		p2 = key[1];
-		p3 = key[2];
-		p4 = key[3];
-		angle = key[4];
-		prev_key_egde = key[5];
-		this_key_egde = key[6];
+	meta = finger[0];
+	column = finger[1];
+	
+	knuckle_plane(meta) {
+		for (key = column) {
+			p1 = key[0];
+			p2 = key[1];
+			p3 = key[2];
+			p4 = key[3];
+			angle = key[4];
+			prev_key_egde = key[5];
+			this_key_egde = key[6];
 
-		finger_plane(p4, angle)
-			keycap();
+			finger_plane(p4, angle)
+				keycap();
 
-		if (SHOW_DEBUG_GEOMETRY) {
-			line(p1, p2);
-			line(p2, p3);
-			line(p3, p4);
+			if (SHOW_DEBUG_GEOMETRY) {
+				line(p1, p2);
+				line(p2, p3);
+				line(p3, p4);
 
-			if (prev_key_egde)
-				line(prev_key_egde[0], prev_key_egde[1], 0.5, "red");
+				if (prev_key_egde)
+					line(prev_key_egde[0], prev_key_egde[1], 0.5, "red");
 
-			if (this_key_egde)
-				line(this_key_egde[0], this_key_egde[1], 0.5, "green");
+				if (this_key_egde)
+					line(this_key_egde[0], this_key_egde[1], 0.5, "green");
 
-			finger_plane(p1, angle) finger_joint();
-			finger_plane(p2, angle/3) finger_joint();
-			finger_plane(p3, angle/1.5) finger_joint();
-			finger_plane(p4, angle) finger_joint();
+				finger_plane(p1, angle) finger_joint();
+				finger_plane(p2, angle/3) finger_joint();
+				finger_plane(p3, angle/1.5) finger_joint();
+				finger_plane(p4, angle) finger_joint();
+			}
 		}
 	}
 }

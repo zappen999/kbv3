@@ -6,28 +6,31 @@ FINGERS = {
         'middle_phalanx_length': 25,
         'distal_phalanx_length': 23,
     },
-    # 'middle': {
-    #     'min_angle': 0,
-    #     'max_angle': -140,
-    #     'proximal_phalanx_length': 55,
-    #     'middle_phalanx_length': 25,
-    #     'distal_phalanx_length': 23,
-    # },
-    # 'ring': {
-    #     'min_angle': 0,
-    #     'max_angle': -140,
-    #     'proximal_phalanx_length': 55,
-    #     'middle_phalanx_length': 25,
-    #     'distal_phalanx_length': 23,
-    # },
-    # 'pinky': {
-    #     'min_angle': 0,
-    #     'max_angle': -140,
-    #     'proximal_phalanx_length': 35,
-    #     'middle_phalanx_length': 19,
-    #     'distal_phalanx_length': 22,
-    # },
+    'middle': {
+        'min_angle': 0,
+        'max_angle': -130,
+        'proximal_phalanx_length': 57,
+        'middle_phalanx_length': 31,
+        'distal_phalanx_length': 27,
+    },
+    'ring': {
+        'min_angle': 0,
+        'max_angle': -140,
+        'proximal_phalanx_length': 51,
+        'middle_phalanx_length': 28,
+        'distal_phalanx_length': 25,
+    },
+    'pinky': {
+        'min_angle': 0,
+        'max_angle': -140,
+        'proximal_phalanx_length': 35,
+        'middle_phalanx_length': 19,
+        'distal_phalanx_length': 22,
+    },
 }
+
+KNUCKLE_WIDTH = 72;
+FINGER_SPREAD = 120;
 
 KEYCAP_BOX = {'x': 18, 'y': 18, 'z': 7}
 

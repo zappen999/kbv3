@@ -13,6 +13,19 @@ class Point:
         return "[%f, %f]" % (self.x, self.y)
 
 
+class DDDPoint:
+    def __init__(self, x, y, z):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+    def __repr__(self):
+        return "Point [%.2f, %.2f, %.2f]" % (self.x, self.y, self.z)
+
+    def to_openscad(self):
+        return "[%f, %f, %f]" % (self.x, self.y, self.z)
+
+
 class LineSegment:
     def __init__(self, p1, p2):
         assert isinstance(p1, Point), \
