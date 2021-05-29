@@ -3,7 +3,8 @@ include <../libs/KeyV2/src/settings.scad>;
 include <../libs/KeyV2/src/key_profiles.scad>;
 include <../libs/KeyV2/src/key.scad>;
 
-$using_customizer = false;
+// Prevent key.scad form rendering a key on inclusion
+$using_customizer = true;
 
 SWITCH_PLATE_THICKNESS=3;
 SWITCH_MIN_SPACE_CC=18.5;
