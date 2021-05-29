@@ -6,8 +6,7 @@ include <../libs/KeyV2/src/key.scad>;
 // Prevent key.scad form rendering a key on inclusion
 $using_customizer = true;
 
-SWITCH_PLATE_THICKNESS=3;
-SWITCH_MIN_SPACE_CC=18.5;
+SWITCH_PLATE = [25, 25, 2];
 
 function deg2rad(deg) = deg*PI/180;
 function inch2mm(inches) = inches*25.4;
@@ -38,18 +37,29 @@ module keycap(real=false) {
 		}
 }
 
-module mx_switch_plate() {
-	difference() {
-		cube([
-			SWITCH_MIN_SPACE_CC,
-			SWITCH_MIN_SPACE_CC,
-			SWITCH_PLATE_THICKNESS,
-		], center=true);
-		cube([
-			inch2mm(0.551),
-			inch2mm(0.551),
-			SWITCH_PLATE_THICKNESS*2,
-		], center=true);
+module mx_switch_plate_bucket() {
+	translate([0, 0, -SWITCH_PLATE.z/2]) {
+		difference() {
+			union() {
+				translate([0, 0, -10+SWITCH_PLATE.z+2])
+					cube([
+							inch2mm(0.551) + 1,
+							inch2mm(0.551) + 1,
+							10,
+					], center=true);
+
+				cube([
+					SWITCH_PLATE.x,
+					SWITCH_PLATE.y,
+					SWITCH_PLATE.z,
+				], center=true);
+			}
+			cube([
+				inch2mm(0.551),
+				inch2mm(0.551),
+				SWITCH_PLATE.z*8,
+			], center=true);
+		}
 	}
 }
 
@@ -83,8 +93,14 @@ for (finger = FINGERS) {
 			prev_key_egde = key[5];
 			this_key_egde = key[6];
 
-			finger_plane(p4, angle)
-				keycap();
+			finger_plane(p4, angle) {
+				translate([0, 0, -15.5])  // 15.5mm from top of keycap to the plate
+					mx_switch_plate_bucket();
+
+				if (SHOW_DEBUG_GEOMETRY) {
+					keycap();
+				}
+			}
 
 			if (SHOW_DEBUG_GEOMETRY) {
 				line(p1, p2);
